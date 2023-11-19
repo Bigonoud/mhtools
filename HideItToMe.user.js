@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         HideItToMe
-// @version      1.0
+// @version      1.1
 // @description  Hide messages you don't want to see
 // @author       Bigonoud
 // @match        *://myhordes.de/*
@@ -129,7 +129,7 @@ function addBanButtons() {
                     removeBan.style.paddingLeft = '5px';
                     removeBan.style.fontSize = '14px';
                     removeBan.style.cursor = 'pointer';
-                    removeBan.textContent = 'cancel';
+                    removeBan.textContent = 'lock_open_right';
 
                     removeBan.addEventListener('click', () => {
                         bannedPpl = bannedPpl.filter((value) => value != userId);
