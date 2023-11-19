@@ -7,6 +7,8 @@
 // @match        *://myhordes.eu/*
 // @match        *://myhord.es/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=myhordes.eu
+// @downloadURL  https://github.com/Bigonoud/mhtools/raw/master/HideItToMe.user.js
+// @updateURL    https://github.com/Bigonoud/mhtools/raw/master/HideItToMe.user.js
 // @grant        GM.setValue
 // @grant        GM.getValue
 // ==/UserScript==
