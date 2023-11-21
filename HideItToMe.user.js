@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         HideItToMe
-// @version      1.2
+// @version      1.3
 // @description  Hide messages you don't want to see
 // @author       Bigonoud
 // @match        *://myhordes.de/*
@@ -176,46 +176,53 @@ function addBanButtons() {
                 const userId = userName.getAttribute('x-user-id');
 
                 if (userId) {
-                    const addBan = document.createElement('span');
-                    addBan.title = texts.add_ban_title[lang];
-                    addBan.className = 'material-symbols-outlined';
-                    addBan.style.paddingLeft = '5px';
-                    addBan.style.fontSize = '14px';
-                    addBan.style.cursor = 'pointer';
-                    addBan.textContent = 'block';
-                    addBan.setAttribute('add-ban-user-id', userId);
+                    const oldAddButton = message.querySelector("span[add-ban-user-id]");
+                    const oldRemoveButton = message.querySelector("span[remove-ban-user-id]");
 
-                    addBan.addEventListener('click', () => {
-                        bannedPpl.push(userId);
-                        GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
-                        addBan.remove();
-                        userName.after(removeBan);
-                        hideMessages();
-                        updateButtons(userId, true);
-                    });
-
-                    const removeBan = document.createElement('span');
-                    removeBan.title = texts.remove_ban_title[lang];
-                    removeBan.className = 'material-symbols-outlined';
-                    removeBan.style.paddingLeft = '5px';
-                    removeBan.style.fontSize = '14px';
-                    removeBan.style.cursor = 'pointer';
-                    removeBan.textContent = 'lock_open_right';
-                    removeBan.setAttribute('remove-ban-user-id', userId);
-
-                    removeBan.addEventListener('click', () => {
-                        bannedPpl = bannedPpl.filter((value) => value != userId);
-                        GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
-                        removeBan.remove();
-                        userName.after(addBan);
-                        showMessages(userId);
-                        updateButtons(userId, false);
-                    });
-
-                    if (!bannedPpl.includes(userId)) {
-                        userName.after(addBan);
+                    if (oldAddButton || oldRemoveButton) {
+                        updateButtons(userId);
                     } else {
-                        userName.after(removeBan);
+                        const addBan = document.createElement('span');
+                        addBan.title = texts.add_ban_title[lang];
+                        addBan.className = 'material-symbols-outlined';
+                        addBan.style.paddingLeft = '5px';
+                        addBan.style.fontSize = '14px';
+                        addBan.style.cursor = 'pointer';
+                        addBan.textContent = 'block';
+                        addBan.setAttribute('add-ban-user-id', userId);
+
+                        addBan.addEventListener('click', () => {
+                            bannedPpl.push(userId);
+                            GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
+                            addBan.remove();
+                            userName.after(removeBan);
+                            hideMessages();
+                            updateButtons(userId);
+                        });
+
+                        const removeBan = document.createElement('span');
+                        removeBan.title = texts.remove_ban_title[lang];
+                        removeBan.className = 'material-symbols-outlined';
+                        removeBan.style.paddingLeft = '5px';
+                        removeBan.style.fontSize = '14px';
+                        removeBan.style.cursor = 'pointer';
+                        removeBan.textContent = 'lock_open_right';
+                        removeBan.setAttribute('remove-ban-user-id', userId);
+
+                        removeBan.addEventListener('click', () => {
+                            bannedPpl = bannedPpl.filter((value) => value != userId);
+                            GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
+                            removeBan.remove();
+                            userName.after(addBan);
+                            showMessages(userId);
+                            updateButtons(userId);
+                        });
+
+                        if (!bannedPpl.includes(userId)) {
+                            userName.after(addBan);
+                        } else {
+                            userName.after(removeBan);
+                        }
                     }
                 }
             }
