@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         HideItToMe
-// @version      1.1
+// @version      1.2
 // @description  Hide messages you don't want to see
 // @author       Bigonoud
 // @match        *://myhordes.de/*
@@ -69,7 +69,7 @@ function hideMessages() {
             message.appendChild(collapsedContent);
 
             collapsor.addEventListener('click', () => {
-                if (collapsor.getAttribute('data-open') == '1') {
+                if (collapsor.getAttribute('data-open') === '1') {
                     collapsor.setAttribute('data-open', '0');
                     collapsedContent.style.maxHeight = '0';
                     collapsedContent.style.opacity = '0';
@@ -88,10 +88,79 @@ function showMessages(userId) {
     let messages = Array.from(document.querySelectorAll("div[x-post-content-author-id]"));
 
     if (messages.length > 0) {
-        messages = messages.filter((elem) => elem.getAttribute('x-post-content-author-id') == userId);
+        messages = messages.filter((elem) => elem.getAttribute('x-post-content-author-id') === userId);
 
         messages.forEach((message) => {
-            message.innerHTML = message.getElementsByClassName('collapsed')[0].innerText;
+            message.innerHTML = message.getElementsByClassName('collapsed')[0]?.innerHTML;
+        });
+    }
+}
+
+function updateButtons(userIdUpdate) {
+    let messages = Array.from(document.getElementsByClassName('forum-post-header'));
+
+    if (messages.length > 0) {
+        messages.forEach((message) => {
+            const userName = message.getElementsByClassName('username')[0];
+
+            if (userName) {
+                const userId = userName.getAttribute('x-user-id');
+
+                if (userId === userIdUpdate) {
+                    const oldAddButton = message.querySelector("span[add-ban-user-id]");
+                    const oldRemoveButton = message.querySelector("span[remove-ban-user-id]");
+
+                    const addBan = document.createElement('span');
+                    addBan.title = texts.add_ban_title[lang];
+                    addBan.className = 'material-symbols-outlined';
+                    addBan.style.paddingLeft = '5px';
+                    addBan.style.fontSize = '14px';
+                    addBan.style.cursor = 'pointer';
+                    addBan.textContent = 'block';
+                    addBan.setAttribute('add-ban-user-id', userId);
+
+                    addBan.addEventListener('click', () => {
+                        bannedPpl.push(userId);
+                        GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
+                        addBan.remove();
+                        userName.after(removeBan);
+                        hideMessages();
+                        updateButtons(userId, true);
+                    });
+
+                    const removeBan = document.createElement('span');
+                    removeBan.title = texts.remove_ban_title[lang];
+                    removeBan.className = 'material-symbols-outlined';
+                    removeBan.style.paddingLeft = '5px';
+                    removeBan.style.fontSize = '14px';
+                    removeBan.style.cursor = 'pointer';
+                    removeBan.textContent = 'lock_open_right';
+                    removeBan.setAttribute('remove-ban-user-id', userId);
+
+                    removeBan.addEventListener('click', () => {
+                        bannedPpl = bannedPpl.filter((value) => value != userId);
+                        GM.setValue(gm_banned_ppl_key, JSON.stringify(bannedPpl));
+                        removeBan.remove();
+                        userName.after(addBan);
+                        showMessages(userId);
+                        updateButtons(userId, false);
+                    });
+
+                    if (oldAddButton) {
+                        oldAddButton.remove();
+                    }
+
+                    if (oldRemoveButton) {
+                        oldRemoveButton.remove();
+                    }
+
+                    if (!bannedPpl.includes(userId)) {
+                        userName.after(addBan);
+                    } else {
+                        userName.after(removeBan);
+                    }
+                }
+            }
         });
     }
 }
@@ -114,6 +183,7 @@ function addBanButtons() {
                     addBan.style.fontSize = '14px';
                     addBan.style.cursor = 'pointer';
                     addBan.textContent = 'block';
+                    addBan.setAttribute('add-ban-user-id', userId);
 
                     addBan.addEventListener('click', () => {
                         bannedPpl.push(userId);
@@ -121,6 +191,7 @@ function addBanButtons() {
                         addBan.remove();
                         userName.after(removeBan);
                         hideMessages();
+                        updateButtons(userId, true);
                     });
 
                     const removeBan = document.createElement('span');
@@ -130,6 +201,7 @@ function addBanButtons() {
                     removeBan.style.fontSize = '14px';
                     removeBan.style.cursor = 'pointer';
                     removeBan.textContent = 'lock_open_right';
+                    removeBan.setAttribute('remove-ban-user-id', userId);
 
                     removeBan.addEventListener('click', () => {
                         bannedPpl = bannedPpl.filter((value) => value != userId);
@@ -137,6 +209,7 @@ function addBanButtons() {
                         removeBan.remove();
                         userName.after(addBan);
                         showMessages(userId);
+                        updateButtons(userId, false);
                     });
 
                     if (!bannedPpl.includes(userId)) {
